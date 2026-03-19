@@ -1,3 +1,7 @@
+metadata:
+  name: fastapi-engine
+  namespace: alpha-backend
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,18 +1,50 @@
+# 1. The Frontend Application
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: alphadoc-production
+  name: alphadoc-frontend
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/swaartWareZakes/alpha-doc-gitops.git'
     targetRevision: main
-    path: k8s 
+    path: k8s
+    # Trick Argo into only reading the UI file
+    directory:
+      include: 'ui-deployment.yaml'
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: default
+    namespace: alpha-frontend
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true  # <--- The Magic Flag
+
+---
+# 2. The Backend Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alphadoc-backend
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/swaartWareZakes/alpha-doc-gitops.git'
+    targetRevision: main
+    path: k8s
+    # Trick Argo into only reading the Engine file
+    directory:
+      include: 'engine-deployment.yaml'
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: alpha-backend
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
