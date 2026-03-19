@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-engine
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-engine
+  template:
+    metadata:
+      labels:
+        app: fastapi-engine
+    spec:
+      # THE "MO" FLEX: Forcing this pod onto the AI Node Pool
+      nodeSelector:
+        agentpool: aipool
+      tolerations:
+      - key: "workload"
+        operator: "Equal"
+        value: "ai"
+        effect: "NoSchedule"
+      containers:
+      - name: fastapi-engine
+        image: acralphadocaiprod.azurecr.io/fastapi-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        # We pass the keys dynamically (In production, use ExternalSecrets or Azure KeyVault!)
+        - name: SUPABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: alpha-secrets
+              key: SUPABASE_URL
+        - name: SUPABASE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: alpha-secrets
+              key: SUPABASE_KEY
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: alpha-secrets
+              key: GOOGLE_API_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-engine-svc
+spec:
+  selector:
+    app: fastapi-engine
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: LoadBalancer
