@@ -1,12 +1,8 @@
-metadata:
-  name: fastapi-engine
-  namespace: alpha-backend
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fastapi-engine
-  namespace: default
+  namespace: alpha-backend  # <--- FIXED
 spec:
   replicas: 1
   selector:
@@ -17,7 +13,6 @@ spec:
       labels:
         app: fastapi-engine
     spec:
-      # THE "MO" FLEX: Forcing this pod onto the AI Node Pool
       nodeSelector:
         agentpool: aipool
       tolerations:
@@ -32,7 +27,6 @@ spec:
         ports:
         - containerPort: 8000
         env:
-        # We pass the keys dynamically (In production, use ExternalSecrets or Azure KeyVault!)
         - name: SUPABASE_URL
           valueFrom:
             secretKeyRef:
@@ -53,6 +47,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: fastapi-engine-svc
+  namespace: alpha-backend  # <--- FIXED
 spec:
   selector:
     app: fastapi-engine

@@ -1,13 +1,8 @@
-metadata:
-  name: nextjs-ui
-  namespace: alpha-frontend
-  
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nextjs-ui
-  namespace: default
+  namespace: alpha-frontend  # <--- FIXED
 spec:
   replicas: 1
   selector:
@@ -29,6 +24,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nextjs-ui-svc
+  namespace: alpha-frontend  # <--- FIXED
 spec:
   selector:
     app: nextjs-ui
